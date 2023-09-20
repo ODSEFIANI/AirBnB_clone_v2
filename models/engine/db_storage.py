@@ -14,10 +14,6 @@ from models.user import User
 from models.amenity import Amenity
 
 
-
-
-
-
 class DBStorage:
     __engine__ = None
     __session__ = None
@@ -76,5 +72,3 @@ class DBStorage:
     def save(self):
         """saves the changes"""
         self.__session.commit()
-
- 
