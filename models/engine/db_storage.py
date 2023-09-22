@@ -15,6 +15,7 @@ from models.amenity import Amenity
 
 
 class DBStorage:
+    """ DBStorage class"""
     __engine__ = None
     __session__ = None
 
@@ -27,28 +28,33 @@ class DBStorage:
         hb_host = getenv("HBNB_MYSQL_HOST")
         hb_db = getenv("HBNB_MYSQL_DB")
         hb_env = getenv("HBNB_ENV")
-        self.__engine__= creat
+        
+        self.__engine = create_engine(
+            f"mysql+mysqldb://{hb_user}:{hb_pwd}@{hb_host}/{hb_db}",
+            pool_pre_ping=True,
+        )
 
-    if(hb_env == test):
-         Base.metadata.drop_all(self.__engine)
+        if hb_env == "test":
+            Base.metadata.drop_all(self.__engine)
 
 
     def all(self, cls=None):
         """
-        query on the current database session"""
-        allClasses = [User, Place, State, City, Amenity, Review]
+        query on the current database session
+        """
+        allClasses = [User, State, Place, Amenity, City, Review]
         result = {}
         if cls is not None:
             for obj in self.__session.query(cls).all():
                 ClassName = obj.__class__.__name__
-                keyName = ClassName + "." + obj.id
-                result[keyName] = obj
+                kn = ClassName + "." + obj.id
+                result[kn] = obj
         else:
             for clss in allClasses:
                 for obj in self.__session.query(clss).all():
                     ClassName = obj.__class__.__name__
-                    keyName = ClassName + "." + obj.id
-                    result[keyName] = obj
+                    kn = ClassName + "." + obj.id
+                    result[kn] = obj
         return result
 
     def reload(self):
