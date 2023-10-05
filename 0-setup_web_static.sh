@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-# script that sets up your web servers for the deployment of web_static
+# configure server to deploy web_static
 sudo apt-get -y update
 sudo apt-get -y install nginx
 sudo service nginx start
-sudo mkdir -p /data/
-sudo mkdir -p /data/web_static/
-sudo mkdir -p /data/web_static/releases/
-sudo mkdir -p /data/web_static/shared/
-sudo mkdir -p /data/web_static/releases/test/
+sudo mkdir -p /data/web_static/{releases/test,shared,current}
 page="<html>\n\t<head>\n\t</head>\n\t<body>\n\t\tHolberton School\n\t</body>\n</html>"
 echo "$page" | sudo tee /data/web_static/releases/test/index.html
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
