@@ -1,72 +1,33 @@
-# Setup the web serversc
-
-exec { '/usr/bin/env apt -y update': }
-
--> package { 'nginx':
-  ensure => installed,
+# bash script configure nginx
+if ! which('nginx') {
+  exec { 'update':
+    command     => '/usr/bin/apt-get update',
+  }
+  -> package { 'nginx':
+    ensure => installed,
+  }
 }
-
--> file { '/data':
-  ensure => 'directory'
+-> exec { 'run':
+  command => '/usr/bin/mkdir -p "/data/web_static/releases/test/" "/data/web_static/shared/"',
 }
--> file { '/data/web_static':
-  ensure => 'directory'
+-> exec { 'run':
+  command => '/usr/bin/echo "Hi!" | sudo tee /data/web_static/releases/test/index.html > /dev/null',
 }
--> file { '/data/web_static/releases':
-  ensure => 'directory'
+-> exec { 'run':
+  command => '/usr/bin/rm -rf /data/web_static/current',
 }
--> file { '/data/web_static/releases/test':
-  ensure => 'directory'
+-> exec { 'run':
+  command => '/usr/bin/ln -s /data/web_static/releases/test/ /data/web_static/current',
 }
--> file { '/data/web_static/shared':
-  ensure => 'directory'
+-> exec { 'run':
+  command => '/usr/bin/chown -R ubuntu:ubuntu /data/',
 }
-
--> file { '/data/web_static/releases/test/index.html':
-  ensure  => 'present',
-  content => "<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    <p>Nginx server test</p>
-  </body>
-</html>"
+-> file_line { 'location_hbnb_static':
+  path     => '/etc/nginx/sites-available/default',
+  match    => '^server {',
+  line     => 'location /hbnb_static {alias /data/web_static/current/;index index.html;}',
+  multiple => false,
 }
--> file { '/var/www':
-  ensure => 'directory'
+-> exec { 'run':
+  command => '/usr/sbin/service nginx restart',
 }
--> file { '/var/www/html':
-  ensure => 'directory'
-}
--> file { '/var/www/html/index.html':
-  ensure  => 'present',
-  content => "<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    <p>Nginx server test</p>
-  </body>
-</html>"
-}
-
--> file { '/data/web_static/current':
-  ensure => 'link',
-  target => '/data/web_static/releases/test'
-}
-
--> exec { 'chown -R ubuntu:ubuntu /data/':
-  path => '/usr/bin/:/usr/local/bin/:/bin/'
-}
-
-exec { 'nginx_conf':
-  environment => ['data=\ \tlocation /hbnb_static {\n\t\talias /data/web_static/current;\n\t}\n'],
-  command     => 'sed -i "39i $data" /etc/nginx/sites-enabled/default',
-  path        => '/usr/bin:/usr/sbin:/bin:/usr/local/bin'
-}
-
--> service { 'nginx':
-  ensure => running,
-}
-
