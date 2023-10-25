@@ -78,3 +78,6 @@ class DBStorage:
     def save(self):
         """saves the changes"""
         self.__session.commit()
+    def close(self):
+        """close method"""
+        self.__session.close()
